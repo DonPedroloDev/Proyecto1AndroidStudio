@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/bg_main">
+
+    <!-- Columna izquierda: Logo -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/logoImage"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:src="@drawable/logo_quizmania"
+            android:contentDescription="@string/logo_desc"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
+
+    <!-- Columna derecha: Botones -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- JUGAR -->
+        <LinearLayout
+            android:id="@+id/btnPlay"
+            android:layout_width="250dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/bg_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="14dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_play"
+                app:tint="@android:color/white"
+                android:contentDescription="@string/play"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/play"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:layout_marginStart="10dp"/>
+        </LinearLayout>
+
+        <!-- OPCIONES -->
+        <LinearLayout
+            android:id="@+id/btnOptions"
+            android:layout_width="250dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/bg_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="14dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_settings"
+                app:tint="@android:color/white"
+                android:contentDescription="@string/options"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/options"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:layout_marginStart="10dp"/>
+        </LinearLayout>
+
+        <!-- PUNTUACIONES (deshabilitado) -->
+        <LinearLayout
+            android:id="@+id/btnScores"
+            android:layout_width="250dp"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/bg_button"
+            android:enabled="false"
+            android:alpha="0.45"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_scores"
+                app:tint="@android:color/white"
+                android:contentDescription="@string/scores"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scores"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:layout_marginStart="10dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
