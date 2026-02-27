@@ -2,6 +2,7 @@ package com.example.proyecto1
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var currentQuestionText: TextView
     private lateinit var prevButton: Button
     private lateinit var nextButton: Button
+    private lateinit var topicIcon: ImageView
 
     private var currentQuestion = 1
     private val totalQuestions = 10
@@ -33,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         currentQuestionText = findViewById(R.id.currentQuestionText)
         prevButton = findViewById(R.id.prevButton)
         nextButton = findViewById(R.id.nextButton)
+        topicIcon = findViewById(R.id.topicIcon)
 
         selectedQuestions = selectQuestions(totalQuestions)
         updateQuestion()
@@ -81,6 +84,18 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         questionCounter.text = "$currentQuestion/$totalQuestions"
         currentQuestionText.text = selectedQuestions[currentQuestion - 1].questionText  // ← índice 0
+
+        // Cambiar icono según el tema
+        val question = selectedQuestions[currentQuestion - 1]
+        val iconRes = when (question.topic) {
+            "Deportes"    -> R.drawable.ball_icon
+            "Historia"    -> R.drawable.book_icon
+            "Tecnología"  -> R.drawable.computer_icon
+            "Geografía"   -> R.drawable.earth_icon
+            "Ciencia"     -> R.drawable.flask_icon
+            else          -> R.drawable.book_icon
+        }
+        topicIcon.setImageResource(iconRes)
 
         // Deshabilita los botones en los extremos
         prevButton.isEnabled = currentQuestion > 1
