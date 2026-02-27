@@ -1,6 +1,7 @@
 package com.example.proyecto1
 
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,9 +12,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var questionCounter: TextView
     private lateinit var currentQuestionText: TextView
+    private lateinit var prevButton: Button
+    private lateinit var nextButton: Button
 
-    private var currentQuestion = 2
-    private val totalQuestions = 7
+    private var currentQuestion = 1
+    private val totalQuestions = 10
     private lateinit var selectedQuestions: List<Question>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,9 +31,25 @@ class MainActivity : AppCompatActivity() {
 
         questionCounter = findViewById(R.id.questionCounter)
         currentQuestionText = findViewById(R.id.currentQuestionText)
+        prevButton = findViewById(R.id.prevButton)
+        nextButton = findViewById(R.id.nextButton)
 
         selectedQuestions = selectQuestions(totalQuestions)
         updateQuestion()
+
+        prevButton.setOnClickListener {
+            if (currentQuestion > 1) {
+                currentQuestion--
+                updateQuestion()
+            }
+        }
+
+        nextButton.setOnClickListener {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++
+                updateQuestion()
+            }
+        }
     }
 
     private fun selectQuestions(total: Int): List<Question> {
@@ -62,5 +81,9 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         questionCounter.text = "$currentQuestion/$totalQuestions"
         currentQuestionText.text = selectedQuestions[currentQuestion - 1].questionText  // ← índice 0
+
+        // Deshabilita los botones en los extremos
+        prevButton.isEnabled = currentQuestion > 1
+        nextButton.isEnabled = currentQuestion < totalQuestions
     }
 }
