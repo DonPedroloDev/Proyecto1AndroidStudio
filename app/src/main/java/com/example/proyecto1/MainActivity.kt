@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private val totalQuestions = 10
     private lateinit var selectedQuestions: List<Question>
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,7 +38,18 @@ class MainActivity : AppCompatActivity() {
         nextButton = findViewById(R.id.nextButton)
         topicIcon = findViewById(R.id.topicIcon)
 
-        selectedQuestions = selectQuestions(totalQuestions)
+        if (savedInstanceState != null) {
+            // Restaurar estado guardado
+            currentQuestion = savedInstanceState.getInt("currentQuestion")
+            val indices = savedInstanceState.getIntArray("selectedQuestions")!!
+            selectedQuestions = indices.map { QuestionBank.allQuestions[it] }
+        } else {
+            // Primera vez que abre la Activity
+            currentQuestion = 1
+            selectedQuestions = selectQuestions(totalQuestions)
+        }
+
+
         updateQuestion()
 
         prevButton.setOnClickListener {
@@ -100,5 +112,13 @@ class MainActivity : AppCompatActivity() {
         // Deshabilita los botones en los extremos
         prevButton.isEnabled = currentQuestion > 1
         nextButton.isEnabled = currentQuestion < totalQuestions
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("currentQuestion", currentQuestion)
+        // Guardamos los índices de las preguntas seleccionadas
+        val indices = selectedQuestions.map { QuestionBank.allQuestions.indexOf(it) }.toIntArray()
+        outState.putIntArray("selectedQuestions", indices)
     }
 }
