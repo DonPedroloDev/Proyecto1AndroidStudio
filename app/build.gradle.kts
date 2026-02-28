@@ -1,11 +1,10 @@
 plugins {
-    id("com.android.application") version "9.0.1"
-    id("org.jetbrains.kotlin.android") version "1.9.22"
+    id("com.android.application")
 }
 
 android {
     namespace = "com.example.proyecto1"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.proyecto1"
@@ -33,10 +32,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-}
-
-kotlin {
-    jvmToolchain(8)
 }
 
 dependencies {
