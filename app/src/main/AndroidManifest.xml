@@ -15,11 +15,11 @@
             android:name=".Activity3"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".OpcionesActivity"
             android:exported="true" />
 
         <activity
-            android:name=".OpcionesActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
