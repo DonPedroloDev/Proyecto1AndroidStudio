@@ -13,10 +13,6 @@
         android:theme="@style/Theme.Proyecto1">
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
-
-        <activity
-            android:name=".OpcionesActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
