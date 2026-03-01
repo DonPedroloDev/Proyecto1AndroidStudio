@@ -7,3 +7,6 @@
 /captures
 .externalNativeBuild
 .cxx
+.idea/.name
+.idea/deploymentTargetSelector.xml
+.idea/deploymentTargetSelector.xml
