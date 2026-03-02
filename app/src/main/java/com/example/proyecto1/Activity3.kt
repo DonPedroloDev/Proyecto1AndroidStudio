@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Activity3 : AppCompatActivity() {
 
@@ -118,7 +121,6 @@ class Activity3 : AppCompatActivity() {
                 finish()
                 return
             }
-            // CORRECCIÓN: Usar la lógica de dificultad para generar las respuestas
             questionsAnswers = selectedQuestions.map { prepareAnswersForDifficulty(it) }.toMutableList()
             questionsEliminated = MutableList(selectedQuestions.size) { mutableSetOf<String>() }
             questionsUsedHint = MutableList(selectedQuestions.size) { false }
@@ -133,13 +135,8 @@ class Activity3 : AppCompatActivity() {
             1 -> 3 // Normal
             else -> 4 // Difícil
         }
-        // Tomamos todas las respuestas incorrectas disponibles y las barajamos
         val allWrong = q.wrongAnswers.shuffled()
-        
-        // El número de incorrectas que necesitamos es (total de opciones - 1)
         val neededWrong = (numOpciones - 1).coerceAtMost(allWrong.size)
-        
-        // Combinamos las incorrectas seleccionadas con la correcta y volvemos a barajar
         return (allWrong.take(neededWrong) + q.correctAnswer).shuffled()
     }
 
@@ -169,9 +166,12 @@ class Activity3 : AppCompatActivity() {
 
     private fun finalizarTrivia() {
         if (!questionsAnswered.all { it }) {
-            Toast.makeText(this, getString(R.string.answer_all_toast), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Debes responder todas las preguntas", Toast.LENGTH_SHORT).show()
             return
         }
+
+        // MARCAMOS LA PARTIDA COMO TERMINADA
+        GameSettings.partidaTerminada = true
 
         var correctas = 0
         var totalPuntos = 0
@@ -183,7 +183,7 @@ class Activity3 : AppCompatActivity() {
             
             if (isCorrect) {
                 correctas++
-                val basePoints = q.difficulty * 100 
+                val basePoints = 100 
                 val finalPoints = if (questionsUsedHint[i]) (basePoints * 0.7).toInt() else basePoints
                 totalPuntos += finalPoints
             }
@@ -193,6 +193,16 @@ class Activity3 : AppCompatActivity() {
         totalPuntos += bonus
 
         val hintsUsed = questionsUsedHint.count { it }
+        
+        // GUARDAR EN EL HISTORIAL DE GAMESETTINGS
+        val resultado = GameSettings.PartidaResult(
+            fecha = SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(Date()),
+            puntos = totalPuntos,
+            aciertos = correctas,
+            total = selectedQuestions.size,
+            dificultad = when(GameSettings.dificultad) { 0 -> "Fácil"; 1 -> "Normal"; else -> "Difícil" }
+        )
+        GameSettings.historialPartidas.add(resultado)
 
         val intent = Intent(this, ResultadosActivity::class.java).apply {
             putExtra("TOTAL_SCORE", totalPuntos)
@@ -227,7 +237,7 @@ class Activity3 : AppCompatActivity() {
             "Historia" -> R.drawable.book_icon
             "Ciencia" -> R.drawable.flask_icon
             "Geografía" -> R.drawable.earth_icon
-            "Arte" -> R.drawable.baseline_brush_24
+            "Arte" -> R.drawable.computer_icon
             else -> R.drawable.book_icon
         }
         topicIcon.setImageResource(iconRes)
@@ -252,7 +262,7 @@ class Activity3 : AppCompatActivity() {
                         btn.setTextColor(Color.GRAY)
                     }
                 } else {
-                    btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#6200EE"))
+                    btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#1976D2"))
                     btn.setTextColor(Color.WHITE)
                 }
             } else {
@@ -261,7 +271,7 @@ class Activity3 : AppCompatActivity() {
         }
 
         prevButton.isEnabled = currentQuestionIndex > 0
-        nextButton.text = if (currentQuestionIndex == selectedQuestions.size - 1) getString(R.string.finish_button) else getString(R.string.next_button)
+        nextButton.text = if (currentQuestionIndex == selectedQuestions.size - 1) "Finalizar" else "Siguiente"
     }
 
     private fun usarPista() {
@@ -271,16 +281,21 @@ class Activity3 : AppCompatActivity() {
         val eliminated = questionsEliminated[currentQuestionIndex]
         val answers = questionsAnswers[currentQuestionIndex]
         
-        // Opciones visibles que no son la correcta
         val wrongVisible = answers.filter { it != q.correctAnswer && !eliminated.contains(it) }
 
         if (wrongVisible.isNotEmpty()) {
             pistasDisponibles--
             questionsUsedHint[currentQuestionIndex] = true
             
-            // Eliminar una incorrecta al azar
-            eliminated.add(wrongVisible.shuffled().first())
-            Toast.makeText(this, "Pista: Opción descartada", Toast.LENGTH_SHORT).show()
+            // Lógica de descarte: si solo quedan 2, la pista resuelve
+            val totalVisible = answers.count { !eliminated.contains(it) }
+            if (totalVisible <= 2) {
+                eliminated.addAll(wrongVisible)
+            } else {
+                eliminated.add(wrongVisible.shuffled().first())
+            }
+            
+            Toast.makeText(this, "Pista utilizada", Toast.LENGTH_SHORT).show()
             updateUI()
         }
     }
