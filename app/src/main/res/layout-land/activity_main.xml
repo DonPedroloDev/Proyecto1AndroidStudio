@@ -8,23 +8,25 @@
     android:background="@drawable/bg_main"
     tools:context=".MainActivity">
 
+    <!-- Logo a la izquierda, centrado -->
     <ImageView
         android:id="@+id/logo_image_view"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:layout_marginTop="72dp"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
         android:contentDescription="@string/logo_desc"
         android:src="@drawable/logo_quizmania"
         android:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/jugar_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.35" />
 
+    <!-- Botones a la derecha -->
     <Button
         android:id="@+id/jugar_button"
         android:layout_width="260dp"
         android:layout_height="48dp"
-        android:layout_marginTop="28dp"
         android:background="@drawable/bg_button"
         android:text="@string/play"
         android:textColor="@android:color/white"
@@ -34,9 +36,12 @@
         app:iconPadding="10dp"
         app:iconGravity="textStart"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/logo_image_view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/logo_image_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/opciones_button"
+        app:layout_constraintVertical_chainStyle="packed"
+        android:layout_marginStart="24dp" />
 
     <Button
         android:id="@+id/opciones_button"
@@ -52,9 +57,10 @@
         app:iconPadding="10dp"
         app:iconGravity="textStart"
         android:gravity="center"
+        app:layout_constraintStart_toStartOf="@id/jugar_button"
+        app:layout_constraintEnd_toEndOf="@id/jugar_button"
         app:layout_constraintTop_toBottomOf="@id/jugar_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/puntuaciones_button" />
 
     <Button
         android:id="@+id/puntuaciones_button"
@@ -65,15 +71,16 @@
         android:enabled="false"
         android:alpha="0.45"
         android:text="@string/scores"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textAllCaps="false"
         app:icon="@drawable/ic_scores"
-        app:iconTint="@android:color/black"
+        app:iconTint="@android:color/white"
         app:iconPadding="10dp"
         app:iconGravity="textStart"
         android:gravity="center"
+        app:layout_constraintStart_toStartOf="@id/jugar_button"
+        app:layout_constraintEnd_toEndOf="@id/jugar_button"
         app:layout_constraintTop_toBottomOf="@id/opciones_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
