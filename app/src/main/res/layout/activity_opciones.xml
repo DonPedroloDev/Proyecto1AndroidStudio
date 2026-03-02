@@ -1,15 +1,18 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FFFFFF"
     tools:context=".OpcionesActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <TextView
             style="@style/TextAppearance.Material3.HeadlineMedium"
@@ -17,13 +20,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Opciones de Juego"
+            android:textColor="#000000"
+            android:textStyle="bold"
             android:layout_marginBottom="24dp"/>
 
+        <!-- Temas Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#F8F9FA"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -37,41 +44,50 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Temas de Preguntas"
+                    android:textColor="#1976D2"
+                    android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
 
                 <CheckBox
                     android:id="@+id/checkbox_tema1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Historia"/>
+                    android:text="Historia"
+                    android:textColor="#333333"/>
                 <CheckBox
                     android:id="@+id/checkbox_tema2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ciencia"/>
+                    android:text="Ciencia"
+                    android:textColor="#333333"/>
                 <CheckBox
                     android:id="@+id/checkbox_tema3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Deportes"/>
+                    android:text="Deportes"
+                    android:textColor="#333333"/>
                 <CheckBox
                     android:id="@+id/checkbox_tema4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Arte"/>
+                    android:text="Arte"
+                    android:textColor="#333333"/>
                 <CheckBox
                     android:id="@+id/checkbox_tema5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Geografía"/>
+                    android:text="Geografía"
+                    android:textColor="#333333"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Preguntas Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#F8F9FA"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -85,6 +101,8 @@
                     style="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="#1976D2"
+                    android:textStyle="bold"
                     android:text="Número de Preguntas: 5"/>
 
                 <com.google.android.material.slider.Slider
@@ -94,15 +112,20 @@
                     android:stepSize="1.0"
                     android:value="5.0"
                     android:valueFrom="5.0"
-                    android:valueTo="10.0" />
+                    android:valueTo="10.0"
+                    app:thumbColor="#1976D2"
+                    app:trackColorActive="#1976D2"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Dificultad Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="8dp">
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#F8F9FA"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,8 +137,17 @@
                     style="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dificultad"
+                    android:text="Ajustes de Partida"
+                    android:textColor="#1976D2"
+                    android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dificultad:"
+                    android:textSize="14sp"
+                    android:textColor="#666666"/>
 
                 <Spinner
                     android:id="@+id/spinner_dificultad"
@@ -125,20 +157,27 @@
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_pistas"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
                     android:checked="true"
-                    android:text="Habilitar Pistas (Inicial: 3)"/>
+                    android:text="Habilitar Pistas (Inicial: 3)"
+                    android:textColor="#333333"
+                    app:thumbTint="#1976D2"
+                    app:trackTint="#90CAF9"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Guardar Cambios" />
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:text="Guardar Cambios"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#1565C0"
+            app:cornerRadius="28dp" />
 
     </LinearLayout>
 </ScrollView>
