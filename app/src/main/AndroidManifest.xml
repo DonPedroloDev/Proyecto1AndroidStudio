@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto1" >
         <activity
+            android:name=".ResultadosActivity"
+            android:exported="false" />
+        <activity
             android:name=".OpcionesActivity"
             android:exported="false" />
         <activity

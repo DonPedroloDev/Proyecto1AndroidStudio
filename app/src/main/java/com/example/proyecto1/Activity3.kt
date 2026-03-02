@@ -1,5 +1,6 @@
 package com.example.proyecto1
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -10,7 +11,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
@@ -103,12 +103,29 @@ class Activity3 : AppCompatActivity() {
                 finish()
                 return
             }
-            questionsAnswers = selectedQuestions.map { (it.wrongAnswers + it.correctAnswer).shuffled() }.toMutableList()
+            // CORRECCIÓN: Usar la lógica de dificultad para generar las respuestas
+            questionsAnswers = selectedQuestions.map { prepareAnswersForDifficulty(it) }.toMutableList()
             questionsEliminated = MutableList(selectedQuestions.size) { mutableSetOf<String>() }
             questionsUsedHint = MutableList(selectedQuestions.size) { false }
             questionsAnswered = MutableList(selectedQuestions.size) { false }
             questionsUserSelection = MutableList(selectedQuestions.size) { -1 }
         }
+    }
+
+    private fun prepareAnswersForDifficulty(q: Question): List<String> {
+        val numOpciones = when(GameSettings.dificultad) {
+            0 -> 2 // Fácil
+            1 -> 3 // Normal
+            else -> 4 // Difícil
+        }
+        // Tomamos todas las respuestas incorrectas disponibles y las barajamos
+        val allWrong = q.wrongAnswers.shuffled()
+        
+        // El número de incorrectas que necesitamos es (total de opciones - 1)
+        val neededWrong = (numOpciones - 1).coerceAtMost(allWrong.size)
+        
+        // Combinamos las incorrectas seleccionadas con la correcta y volvemos a barajar
+        return (allWrong.take(neededWrong) + q.correctAnswer).shuffled()
     }
 
     private fun setupListeners() {
@@ -124,8 +141,7 @@ class Activity3 : AppCompatActivity() {
                 currentQuestionIndex++
                 updateUI()
             } else {
-                Toast.makeText(this, "¡Fin de la trivia!", Toast.LENGTH_SHORT).show()
-                finish()
+                finalizarTrivia()
             }
         }
 
@@ -134,6 +150,45 @@ class Activity3 : AppCompatActivity() {
         answerButtons.forEachIndexed { i, btn ->
             btn.setOnClickListener { checkAnswer(i) }
         }
+    }
+
+    private fun finalizarTrivia() {
+        if (!questionsAnswered.all { it }) {
+            Toast.makeText(this, getString(R.string.answer_all_toast), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        var correctas = 0
+        var totalPuntos = 0
+        
+        for (i in selectedQuestions.indices) {
+            val q = selectedQuestions[i]
+            val userSel = questionsUserSelection[i]
+            val isCorrect = userSel != -1 && questionsAnswers[i][userSel] == q.correctAnswer
+            
+            if (isCorrect) {
+                correctas++
+                val basePoints = q.difficulty * 100 
+                val finalPoints = if (questionsUsedHint[i]) (basePoints * 0.7).toInt() else basePoints
+                totalPuntos += finalPoints
+            }
+        }
+
+        val bonus = pistasDisponibles * 200
+        totalPuntos += bonus
+
+        val hintsUsed = questionsUsedHint.count { it }
+
+        val intent = Intent(this, ResultadosActivity::class.java).apply {
+            putExtra("TOTAL_SCORE", totalPuntos)
+            putExtra("CORRECT_ANSWERS", correctas)
+            putExtra("TOTAL_QUESTIONS", selectedQuestions.size)
+            putExtra("HINTS_USED", hintsUsed)
+            putExtra("REMAINING_HINTS", pistasDisponibles)
+            putExtra("BONUS_POINTS", bonus)
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun updateUI() {
@@ -157,7 +212,7 @@ class Activity3 : AppCompatActivity() {
             "Historia" -> R.drawable.book_icon
             "Ciencia" -> R.drawable.flask_icon
             "Geografía" -> R.drawable.earth_icon
-            "Arte" -> R.drawable.computer_icon
+            "Arte" -> R.drawable.baseline_brush_24
             else -> R.drawable.book_icon
         }
         topicIcon.setImageResource(iconRes)
@@ -169,21 +224,20 @@ class Activity3 : AppCompatActivity() {
                 btn.visibility = if (eliminated.contains(text)) View.INVISIBLE else View.VISIBLE
                 btn.isEnabled = !answered && !eliminated.contains(text)
 
-                // Forzar colores para evitar problemas de visibilidad
                 if (answered) {
                     if (text == q.correctAnswer) {
-                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50")) // Verde
+                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50"))
                         btn.setTextColor(Color.WHITE)
                         btn.visibility = View.VISIBLE
                     } else if (i == userSel) {
-                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#F44336")) // Rojo
+                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#F44336"))
                         btn.setTextColor(Color.WHITE)
                     } else {
-                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0E0E0")) // Gris claro
+                        btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E0E0E0"))
                         btn.setTextColor(Color.GRAY)
                     }
                 } else {
-                    btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#6200EE")) // Morado original
+                    btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#6200EE"))
                     btn.setTextColor(Color.WHITE)
                 }
             } else {
@@ -192,7 +246,7 @@ class Activity3 : AppCompatActivity() {
         }
 
         prevButton.isEnabled = currentQuestionIndex > 0
-        nextButton.text = if (currentQuestionIndex == selectedQuestions.size - 1) "Finalizar" else "Siguiente"
+        nextButton.text = if (currentQuestionIndex == selectedQuestions.size - 1) getString(R.string.finish_button) else getString(R.string.next_button)
     }
 
     private fun usarPista() {
@@ -200,23 +254,18 @@ class Activity3 : AppCompatActivity() {
         
         val q = selectedQuestions[currentQuestionIndex]
         val eliminated = questionsEliminated[currentQuestionIndex]
-        val wrongAvailable = q.wrongAnswers.filter { !eliminated.contains(it) }
+        val answers = questionsAnswers[currentQuestionIndex]
+        
+        // Opciones visibles que no son la correcta
+        val wrongVisible = answers.filter { it != q.correctAnswer && !eliminated.contains(it) }
 
-        if (wrongAvailable.isNotEmpty()) {
+        if (wrongVisible.isNotEmpty()) {
             pistasDisponibles--
             questionsUsedHint[currentQuestionIndex] = true
             
-            val totalVisible = questionsAnswers[currentQuestionIndex].count { !eliminated.contains(it) }
-            
-            if (totalVisible <= 2) {
-                // "Si solo quedan dos, la pista responderá la pregunta"
-                eliminated.addAll(q.wrongAnswers)
-                Toast.makeText(this, "Pista: Solo queda la correcta", Toast.LENGTH_SHORT).show()
-            } else {
-                // Eliminar una incorrecta al azar
-                eliminated.add(wrongAvailable.shuffled().first())
-                Toast.makeText(this, "Pista: Opción descartada", Toast.LENGTH_SHORT).show()
-            }
+            // Eliminar una incorrecta al azar
+            eliminated.add(wrongVisible.shuffled().first())
+            Toast.makeText(this, "Pista: Opción descartada", Toast.LENGTH_SHORT).show()
             updateUI()
         }
     }

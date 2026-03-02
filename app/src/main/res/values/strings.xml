@@ -4,4 +4,11 @@
     <string name="options">OPCIONES</string>
     <string name="scores">PUNTUACIONES</string>
     <string name="logo_desc">Logo QuizMania</string>
+    <string name="trivia_finished">¡Trivia Finalizada!</string>
+    <string name="score_format">Puntaje: %1$d / %2$d</string>
+    <string name="hints_used_format">Pistas usadas: %1$d</string>
+    <string name="back_to_main">Volver al Inicio</string>
+    <string name="finish_button">Finalizar</string>
+    <string name="next_button">Siguiente</string>
+    <string name="answer_all_toast">Por favor responde todas las preguntas</string>
 </resources>
