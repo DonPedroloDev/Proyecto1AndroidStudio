@@ -85,7 +85,7 @@ class Activity3 : AppCompatActivity() {
             val topic = topics[topicIndex % topics.size]
             val available = pickedPerTopic[topic]!!
             if (available.isNotEmpty()) {
-                result.add(available.removeFirst())
+                result.add(available.removeAt(0))
             }
             topicIndex++
         }
