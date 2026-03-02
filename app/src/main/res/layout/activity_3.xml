@@ -5,117 +5,175 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="42dp"
+    android:background="#FFFFFF"
+    android:padding="20dp"
     tools:context=".Activity3">
 
-    <!-- Contador de preguntas -->
+    <!-- Header: Question Count and Hints -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/questionCounter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="1/5"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/hintIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text="Pistas: 3"
+            android:textColor="#FF9800"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/hintButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="💡 Pista"
+            android:textColor="#FF9800"
+            app:strokeColor="#FF9800" />
+    </LinearLayout>
+
     <TextView
-        android:id="@+id/questionCounter"
+        android:id="@+id/hintUsedMark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1/10"
-        android:textSize="16sp"
-        android:textColor="#888888"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="4dp"
+        android:text="[Pista Usada]"
+        android:textColor="#F44336"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-    <!-- Icono del tema -->
+    <!-- Topic Icon -->
     <ImageView
         android:id="@+id/topicIcon"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/book_icon"
-        app:layout_constraintTop_toBottomOf="@id/questionCounter"
-        app:layout_constraintStart_toStartOf="parent"
+        app:tint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-    <!-- Texto de la pregunta -->
+    <!-- Question Text -->
     <TextView
         android:id="@+id/currentQuestionText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="Pregunta"
-        android:textSize="20sp"
+        android:text="¿Cargando pregunta...?"
+        android:textColor="#000000"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#1A1A1A"
-        android:lineSpacingExtra="6dp"
-        app:layout_constraintTop_toBottomOf="@id/topicIcon"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <!-- Botones de respuesta -->
-    <LinearLayout
-        android:id="@+id/answersContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/currentQuestionText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/topicIcon" />
 
-        <Button
+    <!-- Answers Container -->
+    <LinearLayout
+        android:id="@+id/answersLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/currentQuestionText">
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/answerButton1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="10dp"
             android:textAllCaps="false"
-            android:text="Respuesta 1"/>
+            android:textSize="16sp"
+            app:backgroundTint="#1976D2"
+            app:cornerRadius="20dp"
+            android:textColor="#FFFFFF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/answerButton2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="10dp"
             android:textAllCaps="false"
-            android:text="Respuesta 2"/>
+            android:textSize="16sp"
+            app:backgroundTint="#1976D2"
+            app:cornerRadius="20dp"
+            android:textColor="#FFFFFF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/answerButton3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="10dp"
             android:textAllCaps="false"
-            android:text="Respuesta 3"/>
+            android:textSize="16sp"
+            app:backgroundTint="#1976D2"
+            app:cornerRadius="20dp"
+            android:textColor="#FFFFFF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/answerButton4"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:textAllCaps="false"
-            android:text="Respuesta 4"/>
-
+            android:textSize="16sp"
+            app:backgroundTint="#1976D2"
+            app:cornerRadius="20dp"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
-    <!-- Botones PREV y NEXT -->
+    <!-- Navigation Buttons -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="32dp">
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/prevButton"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Anterior"
-            android:layout_marginEnd="8dp"/>
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#1565C0"
+            app:cornerRadius="15dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Siguiente"
-            android:layout_marginStart="8dp"/>
-
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#1565C0"
+            app:cornerRadius="15dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
