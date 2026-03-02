@@ -1,6 +1,8 @@
 package com.example.proyecto1
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,11 +21,14 @@ class Activity3 : AppCompatActivity() {
     private lateinit var topicIcon: ImageView
 
     private var currentQuestion = 1
-    private var totalQuestions = 0 // Se inicializa desde GameSettings
+    private var totalQuestions = 0
     private lateinit var selectedQuestions: List<Question>
 
-    // Variable lista para que tus compañeros usen la dificultad (0: Fácil, 1: Normal, 2: Difícil)
     private var gameDifficulty = 0
+
+    private lateinit var answerButtons: List<Button>
+    private lateinit var shuffledAnswers: Array<List<String>>
+    private lateinit var selectedAnswerIndex: IntArray
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,26 +40,40 @@ class Activity3 : AppCompatActivity() {
             insets
         }
 
-        // --- Inicialización de Vistas ---
         questionCounter = findViewById(R.id.questionCounter)
         currentQuestionText = findViewById(R.id.currentQuestionText)
         prevButton = findViewById(R.id.prevButton)
         nextButton = findViewById(R.id.nextButton)
         topicIcon = findViewById(R.id.topicIcon)
 
-        // --- Cargar Opciones desde el Singleton GameSettings ---
+        answerButtons = listOf(
+            findViewById(R.id.answerButton1),
+            findViewById(R.id.answerButton2),
+            findViewById(R.id.answerButton3),
+            findViewById(R.id.answerButton4)
+        )
+
         val requestedQuestions = GameSettings.numPreguntas
         val selectedTopics = GameSettings.temas
         gameDifficulty = GameSettings.dificultad
 
         if (savedInstanceState != null) {
-            // Restaura el estado si la actividad se recrea (ej. rotación)
             currentQuestion = savedInstanceState.getInt("currentQuestion")
             val indices = savedInstanceState.getIntArray("selectedQuestions")!!
             selectedQuestions = indices.map { QuestionBank.allQuestions[it] }
             totalQuestions = selectedQuestions.size
+
+            selectedAnswerIndex = savedInstanceState.getIntArray("selectedAnswerIndex")!!
+            val flat = savedInstanceState.getStringArrayList("shuffledAnswers")!!
+            shuffledAnswers = Array(totalQuestions) { listOf() }
+            var qi = 0
+            val cur = mutableListOf<String>()
+            for (item in flat) {
+                if (item == "|END|") { shuffledAnswers[qi] = cur.toList(); cur.clear(); qi++ }
+                else cur.add(item)
+            }
+
         } else {
-            // Inicia por primera vez: selecciona preguntas según las opciones
             currentQuestion = 1
             selectedQuestions = selectQuestions(requestedQuestions, selectedTopics)
 
@@ -64,11 +83,13 @@ class Activity3 : AppCompatActivity() {
                 return
             }
             totalQuestions = selectedQuestions.size
+
+            selectedAnswerIndex = IntArray(totalQuestions) { -1 }
+            shuffledAnswers = Array(totalQuestions) { i -> buildAnswers(i) }
         }
 
         updateQuestion()
 
-        // --- Listeners de Botones (código existente) ---
         prevButton.setOnClickListener {
             if (currentQuestion > 1) {
                 currentQuestion--
@@ -85,18 +106,14 @@ class Activity3 : AppCompatActivity() {
     }
 
     private fun selectQuestions(questionsToSelect: Int, fromTopics: List<String>): List<Question> {
-        if (fromTopics.isEmpty()) {
-            return emptyList()
-        }
+        if (fromTopics.isEmpty()) return emptyList()
 
         val questionsByTopic = QuestionBank.allQuestions
             .filter { it.topic in fromTopics }
             .groupBy { it.topic }
             .mapValues { it.value.shuffled().toMutableList() }
 
-        if (questionsByTopic.isEmpty()) {
-            return emptyList()
-        }
+        if (questionsByTopic.isEmpty()) return emptyList()
 
         val result = mutableListOf<Question>()
         val availableTopics = questionsByTopic.keys.toMutableList()
@@ -130,25 +147,77 @@ class Activity3 : AppCompatActivity() {
 
         val question = selectedQuestions[currentQuestion - 1]
         val iconRes = when (question.topic) {
-            "Deportes"    -> R.drawable.ball_icon
-            "Historia"    -> R.drawable.book_icon
-            "Ciencia"     -> R.drawable.flask_icon
-            "Geografía"   -> R.drawable.earth_icon
-            "Arte"        -> R.drawable.computer_icon
-            else          -> R.drawable.book_icon
+            "Deportes"   -> R.drawable.ball_icon
+            "Historia"   -> R.drawable.book_icon
+            "Ciencia"    -> R.drawable.flask_icon
+            "Geografía"  -> R.drawable.earth_icon
+            "Arte"       -> R.drawable.baseline_brush_24
+            else         -> R.drawable.book_icon
         }
         topicIcon.setImageResource(iconRes)
 
         prevButton.isEnabled = currentQuestion > 1
         nextButton.isEnabled = currentQuestion < totalQuestions
+
+        updateAnswerButtons()
+    }
+
+    private fun buildAnswers(questionIndex: Int): List<String> {
+        val q = selectedQuestions[questionIndex]
+        val numAnswers = when (gameDifficulty) {
+            0    -> 2  // Fácil
+            2    -> 4  // Difícil
+            else -> 3  // Normal
+        }
+        val wrong = q.wrongAnswers.shuffled().take(numAnswers - 1)
+        return (wrong + q.correctAnswer).shuffled()
+    }
+
+    private fun updateAnswerButtons() {
+        val qi       = currentQuestion - 1
+        val answers  = shuffledAnswers[qi]
+        val selected = selectedAnswerIndex[qi]
+        val correct  = selectedQuestions[qi].correctAnswer
+
+        answerButtons.forEachIndexed { index, button ->
+            if (index < answers.size) {
+                button.visibility = View.VISIBLE
+                button.text       = answers[index]
+                button.isEnabled  = selected == -1
+
+                button.setBackgroundColor(Color.LTGRAY)
+                button.setTextColor(Color.BLACK)
+
+                if (selected != -1) {
+                    when {
+                        answers[index] == correct -> button.setBackgroundColor(Color.GREEN)
+                        index == selected         -> button.setBackgroundColor(Color.RED)
+                    }
+                }
+
+                button.setOnClickListener {
+                    selectedAnswerIndex[qi] = index
+                    updateAnswerButtons()
+                }
+            } else {
+                button.visibility = View.GONE
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (::selectedQuestions.isInitialized && selectedQuestions.isNotEmpty()) {
             outState.putInt("currentQuestion", currentQuestion)
-            val indices = selectedQuestions.mapNotNull { QuestionBank.allQuestions.indexOf(it).takeIf { it != -1 } }.toIntArray()
+            val indices = selectedQuestions.mapNotNull {
+                QuestionBank.allQuestions.indexOf(it).takeIf { it != -1 }
+            }.toIntArray()
             outState.putIntArray("selectedQuestions", indices)
+
+            outState.putIntArray("selectedAnswerIndex", selectedAnswerIndex)
+            val flat = ArrayList<String>()
+            shuffledAnswers.forEach { list -> flat.addAll(list); flat.add("|END|") }
+            outState.putStringArrayList("shuffledAnswers", flat)
         }
     }
 }
