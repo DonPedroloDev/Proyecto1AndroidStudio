@@ -29,6 +29,9 @@ class Activity3 : AppCompatActivity() {
 
     private var currentQuestionIndex = 0
     private var totalQuestions = 0
+
+    private var backPressedTime: Long = 0
+
     private lateinit var selectedQuestions: List<Question>
 
     private var pistasDisponibles = 3
@@ -52,7 +55,19 @@ class Activity3 : AppCompatActivity() {
 
         initViews()
         loadGameData(savedInstanceState)
-        
+
+
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                    showAbandonDialog()
+                } else {
+                    Toast.makeText(this@Activity3, "Pulsa atrás de nuevo para abandonar la partida", Toast.LENGTH_SHORT).show()
+                    backPressedTime = System.currentTimeMillis()
+                }
+            }
+        })
+
         setupListeners()
         updateUI()
     }
@@ -318,5 +333,19 @@ class Activity3 : AppCompatActivity() {
         outState.putBooleanArray("questionsUsedHint", questionsUsedHint.toBooleanArray())
         outState.putBooleanArray("questionsAnswered", questionsAnswered.toBooleanArray())
         outState.putIntArray("questionsUserSelection", questionsUserSelection.toIntArray())
+    }
+
+    private fun showAbandonDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Abandonar partida")
+            .setMessage("¿Seguro que quieres abandonar? Perderás todo tu progreso.")
+            .setPositiveButton("Abandonar") { _, _ ->
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                startActivity(intent)
+                finish()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 }
