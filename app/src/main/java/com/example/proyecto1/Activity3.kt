@@ -1,8 +1,6 @@
 package com.example.proyecto1
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -25,10 +23,8 @@ class Activity3 : AppCompatActivity() {
     private lateinit var selectedQuestions: List<Question>
 
     private var gameDifficulty = 0
-
-    private lateinit var answerButtons: List<Button>
-    private lateinit var shuffledAnswers: Array<List<String>>
-    private lateinit var selectedAnswerIndex: IntArray
+    private var pistasDisponibles = 0
+    private var aciertosConsecutivos = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,46 +42,24 @@ class Activity3 : AppCompatActivity() {
         nextButton = findViewById(R.id.nextButton)
         topicIcon = findViewById(R.id.topicIcon)
 
-        answerButtons = listOf(
-            findViewById(R.id.answerButton1),
-            findViewById(R.id.answerButton2),
-            findViewById(R.id.answerButton3),
-            findViewById(R.id.answerButton4)
-        )
-
-        val requestedQuestions = GameSettings.numPreguntas
-        val selectedTopics = GameSettings.temas
+        // --- Carga lógica de Pistas ---
+        pistasDisponibles = if (GameSettings.pistasEnabled) GameSettings.PISTAS_INICIALES else 0
         gameDifficulty = GameSettings.dificultad
+        totalQuestions = GameSettings.numPreguntas
 
         if (savedInstanceState != null) {
             currentQuestion = savedInstanceState.getInt("currentQuestion")
+            pistasDisponibles = savedInstanceState.getInt("pistasDisponibles")
+            aciertosConsecutivos = savedInstanceState.getInt("aciertosConsecutivos")
             val indices = savedInstanceState.getIntArray("selectedQuestions")!!
             selectedQuestions = indices.map { QuestionBank.allQuestions[it] }
-            totalQuestions = selectedQuestions.size
-
-            selectedAnswerIndex = savedInstanceState.getIntArray("selectedAnswerIndex")!!
-            val flat = savedInstanceState.getStringArrayList("shuffledAnswers")!!
-            shuffledAnswers = Array(totalQuestions) { listOf() }
-            var qi = 0
-            val cur = mutableListOf<String>()
-            for (item in flat) {
-                if (item == "|END|") { shuffledAnswers[qi] = cur.toList(); cur.clear(); qi++ }
-                else cur.add(item)
-            }
-
         } else {
             currentQuestion = 1
-            selectedQuestions = selectQuestions(requestedQuestions, selectedTopics)
-
+            selectedQuestions = selectQuestions(totalQuestions, GameSettings.temas)
             if (selectedQuestions.isEmpty()) {
-                Toast.makeText(this, "No hay preguntas para los temas seleccionados.", Toast.LENGTH_LONG).show()
                 finish()
                 return
             }
-            totalQuestions = selectedQuestions.size
-
-            selectedAnswerIndex = IntArray(totalQuestions) { -1 }
-            shuffledAnswers = Array(totalQuestions) { i -> buildAnswers(i) }
         }
 
         updateQuestion()
@@ -105,6 +79,37 @@ class Activity3 : AppCompatActivity() {
         }
     }
 
+    /**
+     * Lógica para que tus compañeros usen en la respuesta correcta.
+     * Si acierta 2 veces seguidas sin pistas, gana una extra.
+     */
+    private fun registrarAcierto(usoPista: Boolean) {
+        if (!usoPista) {
+            aciertosConsecutivos++
+            if (aciertosConsecutivos == 2) {
+                pistasDisponibles++
+                aciertosConsecutivos = 0
+                Toast.makeText(this, "¡Bonificación! +1 Pista", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            aciertosConsecutivos = 0 // Reinicia racha si usó pista
+        }
+    }
+
+    /**
+     * Función que tus compañeros deben llamar al pulsar el botón de Pista.
+     * Devuelve el índice de una respuesta incorrecta para ocultar/marcar.
+     */
+    private fun usarPista(): Int? {
+        if (pistasDisponibles > 0) {
+            pistasDisponibles--
+            // Aquí irá la lógica para identificar una respuesta incorrecta.
+            // Se la dejo lista para que ellos la conecten con sus botones de respuesta.
+            return 1 // Ejemplo de índice
+        }
+        return null
+    }
+
     private fun selectQuestions(questionsToSelect: Int, fromTopics: List<String>): List<Question> {
         if (fromTopics.isEmpty()) return emptyList()
 
@@ -122,7 +127,6 @@ class Activity3 : AppCompatActivity() {
         while (result.size < questionsToSelect && availableTopics.isNotEmpty()) {
             val currentTopic = availableTopics[topicIndex % availableTopics.size]
             val questionsForTopic = questionsByTopic[currentTopic]
-
             if (questionsForTopic != null && questionsForTopic.isNotEmpty()) {
                 result.add(questionsForTopic.removeAt(0))
                 topicIndex++
@@ -130,94 +134,33 @@ class Activity3 : AppCompatActivity() {
                 availableTopics.remove(currentTopic)
             }
         }
-
         return result.shuffled()
     }
 
     private fun updateQuestion() {
-        if (selectedQuestions.isEmpty()) {
-            currentQuestionText.text = "No hay preguntas disponibles."
-            prevButton.isEnabled = false
-            nextButton.isEnabled = false
-            return
-        }
-
         questionCounter.text = "$currentQuestion/$totalQuestions"
         currentQuestionText.text = selectedQuestions[currentQuestion - 1].questionText
 
-        val question = selectedQuestions[currentQuestion - 1]
-        val iconRes = when (question.topic) {
-            "Deportes"   -> R.drawable.ball_icon
-            "Historia"   -> R.drawable.book_icon
-            "Ciencia"    -> R.drawable.flask_icon
-            "Geografía"  -> R.drawable.earth_icon
-            "Arte"       -> R.drawable.baseline_brush_24
-            else         -> R.drawable.book_icon
+        val iconRes = when (selectedQuestions[currentQuestion - 1].topic) {
+            "Deportes"    -> R.drawable.ball_icon
+            "Historia"    -> R.drawable.book_icon
+            "Ciencia"     -> R.drawable.flask_icon
+            "Geografía"   -> R.drawable.earth_icon
+            "Arte"        -> R.drawable.computer_icon
+            else          -> R.drawable.book_icon
         }
         topicIcon.setImageResource(iconRes)
-
         prevButton.isEnabled = currentQuestion > 1
         nextButton.isEnabled = currentQuestion < totalQuestions
-
-        updateAnswerButtons()
-    }
-
-    private fun buildAnswers(questionIndex: Int): List<String> {
-        val q = selectedQuestions[questionIndex]
-        val numAnswers = when (gameDifficulty) {
-            0    -> 2  // Fácil
-            2    -> 4  // Difícil
-            else -> 3  // Normal
-        }
-        val wrong = q.wrongAnswers.shuffled().take(numAnswers - 1)
-        return (wrong + q.correctAnswer).shuffled()
-    }
-
-    private fun updateAnswerButtons() {
-        val qi       = currentQuestion - 1
-        val answers  = shuffledAnswers[qi]
-        val selected = selectedAnswerIndex[qi]
-        val correct  = selectedQuestions[qi].correctAnswer
-
-        answerButtons.forEachIndexed { index, button ->
-            if (index < answers.size) {
-                button.visibility = View.VISIBLE
-                button.text       = answers[index]
-                button.isEnabled  = selected == -1
-
-                button.setBackgroundColor(Color.LTGRAY)
-                button.setTextColor(Color.BLACK)
-
-                if (selected != -1) {
-                    when {
-                        answers[index] == correct -> button.setBackgroundColor(Color.GREEN)
-                        index == selected         -> button.setBackgroundColor(Color.RED)
-                    }
-                }
-
-                button.setOnClickListener {
-                    selectedAnswerIndex[qi] = index
-                    updateAnswerButtons()
-                }
-            } else {
-                button.visibility = View.GONE
-            }
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (::selectedQuestions.isInitialized && selectedQuestions.isNotEmpty()) {
-            outState.putInt("currentQuestion", currentQuestion)
-            val indices = selectedQuestions.mapNotNull {
-                QuestionBank.allQuestions.indexOf(it).takeIf { it != -1 }
-            }.toIntArray()
-            outState.putIntArray("selectedQuestions", indices)
-
-            outState.putIntArray("selectedAnswerIndex", selectedAnswerIndex)
-            val flat = ArrayList<String>()
-            shuffledAnswers.forEach { list -> flat.addAll(list); flat.add("|END|") }
-            outState.putStringArrayList("shuffledAnswers", flat)
-        }
+        outState.putInt("currentQuestion", currentQuestion)
+        outState.putInt("pistasDisponibles", pistasDisponibles)
+        outState.putInt("aciertosConsecutivos", aciertosConsecutivos)
+        val indices = selectedQuestions.mapNotNull { QuestionBank.allQuestions.indexOf(it).takeIf { it != -1 } }.toIntArray()
+        outState.putIntArray("selectedQuestions", indices)
     }
 }
+
