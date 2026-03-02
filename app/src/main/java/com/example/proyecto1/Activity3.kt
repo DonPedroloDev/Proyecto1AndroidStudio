@@ -85,44 +85,35 @@ class Activity3 : AppCompatActivity() {
     }
 
     private fun selectQuestions(questionsToSelect: Int, fromTopics: List<String>): List<Question> {
-        // Si no se seleccionaron temas, no hay preguntas que devolver.
         if (fromTopics.isEmpty()) {
             return emptyList()
         }
 
-        // 1. Filtrar las preguntas por los temas seleccionados (Tu aporte)
         val questionsByTopic = QuestionBank.allQuestions
             .filter { it.topic in fromTopics }
             .groupBy { it.topic }
-            .mapValues { it.value.shuffled().toMutableList() } // Mezcla las preguntas dentro de cada tema
+            .mapValues { it.value.shuffled().toMutableList() }
 
-        // Si no hay preguntas para los temas seleccionados, devuelve una lista vacía.
         if (questionsByTopic.isEmpty()) {
             return emptyList()
         }
 
-        // 2. Lógica de Round-Robin para repartir las preguntas (El aporte de tu compañero, corregido)
         val result = mutableListOf<Question>()
         val availableTopics = questionsByTopic.keys.toMutableList()
         var topicIndex = 0
 
-        // Repetir hasta alcanzar el número de preguntas deseado o agotar todas las disponibles
         while (result.size < questionsToSelect && availableTopics.isNotEmpty()) {
-            // Selecciona un tema de forma cíclica
             val currentTopic = availableTopics[topicIndex % availableTopics.size]
             val questionsForTopic = questionsByTopic[currentTopic]
 
             if (questionsForTopic != null && questionsForTopic.isNotEmpty()) {
-                // Añade la primera pregunta de la lista y la elimina para no repetirla
                 result.add(questionsForTopic.removeAt(0))
-                topicIndex++ // Avanza al siguiente tema en la próxima iteración
+                topicIndex++
             } else {
-                // Si un tema se queda sin preguntas, se elimina de la lista para no volver a considerarlo
                 availableTopics.remove(currentTopic)
             }
         }
 
-        // 3. Mezcla el resultado final para que el orden no sea predecible (Tu aporte)
         return result.shuffled()
     }
 
